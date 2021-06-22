@@ -4,11 +4,12 @@ const router = Express.Router();
 let validateJWT = require("../middleware/validate-jwt");
 // Import the Log Model
 const { LogModel } = require("../models");
+const Log = require("../models/Log");
 
-router.get('/practice', validateJWT, (req, res) => {
-    res.send('Hey!! This is a practice route!');
-    // ^^ handler function
-});
+// router.get('/practice', validateJWT, (req, res) => {
+//     res.send('Hey!! This is a practice route!');
+//     // ^^ handler function
+// });
 
 /*
 ======================
@@ -24,6 +25,7 @@ router.post("/", validateJWT, async (req, res) => {
         result,
         owner_id: id
     }
+    console.log(`USER ID: ${id}`);
     try {
         const newLog = await LogModel.create(logEntry);
         res.sendStatus(200).json(newLog);
@@ -34,9 +36,9 @@ router.post("/", validateJWT, async (req, res) => {
 
 
 /*
-=========================================
-    WorkOutLogs GET LOGGED-IN USER's
-=========================================
+=============================================
+    WorkOutLogs GET LOGGED-IN USER's LOGS
+=============================================
 */
 
 router.get("/", validateJWT, async (req, res) => {
@@ -63,17 +65,15 @@ router.get("/", validateJWT, async (req, res) => {
 router.get("/:id", async (req, res) => {
     /* ^^^ the : before title makes it a dynamic route */
     const log_Id = req.params.id;
-    const user_Id = req.user.id;
     try {
-        const results = await User.findAll({
+        const results = await Log.findOne({
             where: {   //include:?
                 id: log_Id,
-                owner: user_Id
             }
         });
         res.status(200).json(results);
     } catch (err) {
-        res.status(500).json({ error: err });
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -91,29 +91,28 @@ router.put("/:id", validateJWT, async (req, res) => {
     const query = {
         where: {
             id: logId,
-            owner: userId
+            owner_id: userId
         }
     };
 
     const updatedLog =  {
         description: description,
         definition: definition,
-        result: result,
-        owner_id: userId
+        result: result
     };
 
     try {
         const update = await LogModel.update(updatedLog, query);
         res.status(200).json(update);
     } catch (err) {
-        res.status(500).json({ error: err });
+        res.status(500).json({ error: err.message });
     }
 });
 
 /*
-========================
-    JOURNALS DELETE
-========================
+====================
+    LOGS DELETE
+====================
 */
 
 router.delete("/:id", validateJWT, async (req, res) => {
@@ -124,7 +123,7 @@ router.delete("/:id", validateJWT, async (req, res) => {
         const query = {
             where: {
                 id: logId,
-                owner: ownerId
+                owner_id: ownerId
             }
         };
 
