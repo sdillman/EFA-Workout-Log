@@ -28,7 +28,7 @@ router.post("/", validateJWT, async (req, res) => {
     console.log(`USER ID: ${id}`);
     try {
         const newLog = await LogModel.create(logEntry);
-        res.sendStatus(200).json(newLog);
+        res.status(200).json(newLog);
     } catch (err) {
         res.status(500).json( { error: err.message } );
     }
